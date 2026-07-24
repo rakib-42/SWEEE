@@ -1,45 +1,44 @@
 from ollama import chat
 
-from ai.memory import messages
-from database.search import find_room
-from utils.parser import extract_room_number
-from ai.rag import answer_from_context
+from ai.personality import SYSTEM_PROMPT
+from ai.rag import answer
+from core.config import OLLAMA_MODEL
+from memory.conversation import ConversationMemory
+
+memory = ConversationMemory()
 
 
 def ask(question):
-    room = extract_room_number(question)
 
-    if room:
-        info = find_room(room)
+    # ---------- Knowledge ----------
 
-        if info:
-            context = f"""
-Room Number: {info['room_number']}
-Room Name: {info['room_name']}
-Floor: {info['floor']}
-"""
+    reply = answer(question)
 
-            return answer_from_context(question, context)
+    if reply:
+        memory.add_user(question)
+        memory.add_assistant(reply)
+        return reply
 
-    messages.append(
+    # ---------- General AI ----------
+
+    memory.add_user(question)
+
+    messages = [
         {
-            "role": "user",
-            "content": question
+            "role": "system",
+            "content": SYSTEM_PROMPT
         }
-    )
+    ]
+
+    messages.extend(memory.get_history())
 
     response = chat(
-        model="qwen2.5:1.5b",
+        model=OLLAMA_MODEL,
         messages=messages
     )
 
-    answer = response["message"]["content"]
+    answer_text = response["message"]["content"].strip()
 
-    messages.append(
-        {
-            "role": "assistant",
-            "content": answer
-        }
-    )
+    memory.add_assistant(answer_text)
 
-    return answer
+    return answer_text
