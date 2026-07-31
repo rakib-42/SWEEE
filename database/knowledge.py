@@ -61,7 +61,7 @@ def build_place_context(places):
     return context
 
 
-def retrieve_context(question):
+def retrieve_context_for_ai(question):
     keywords = extract_keywords(question)
 
     if not keywords:

@@ -1,18 +1,25 @@
 from ollama import chat
-
 from ai.personality import SYSTEM_PROMPT
 from ai.rag import answer
 from core.config import OLLAMA_MODEL
 from memory.conversation import ConversationMemory
+from database.engine import search
 
 memory = ConversationMemory()
 
 
 def ask(question):
 
-    # ---------- Knowledge ----------
+    # ---------- Knowledge Engine ----------
+    knowledge = search(question)
 
-    reply = answer(question)
+    if knowledge["found"]:
+        memory.add_user(question)
+        memory.add_assistant(knowledge["answer"])
+        return knowledge["answer"]
+
+    # ---------- RAG ----------
+    reply = answer(question, "")
 
     if reply:
         memory.add_user(question)
@@ -20,7 +27,6 @@ def ask(question):
         return reply
 
     # ---------- General AI ----------
-
     memory.add_user(question)
 
     messages = [

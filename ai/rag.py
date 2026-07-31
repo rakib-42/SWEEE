@@ -2,7 +2,6 @@ from ollama import chat
 
 from ai.personality import SYSTEM_PROMPT
 from core.config import OLLAMA_MODEL
-from database.knowledge import retrieve_context
 
 
 RAG_PROMPT = (
@@ -20,13 +19,7 @@ Additional RAG Rules:
 )
 
 
-def answer(question):
-    """
-    Search the local knowledge base and answer
-    using ONLY the retrieved information.
-    """
-
-    context = retrieve_context(question)
+def answer(question, context):
 
     if not context:
         return None
