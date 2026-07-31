@@ -17,15 +17,19 @@ def search_teacher(keyword):
     conn = get_connection()
     cursor = conn.cursor()
 
+    keyword = keyword.strip()
+
     cursor.execute("""
         SELECT *
         FROM teachers
         WHERE
-            LOWER(name) LIKE LOWER(?)
+            CAST(id AS TEXT) = ?
+            OR LOWER(name) LIKE LOWER(?)
             OR LOWER(designation) LIKE LOWER(?)
             OR LOWER(department) LIKE LOWER(?)
             OR LOWER(email) LIKE LOWER(?)
     """, (
+        keyword,
         f"%{keyword}%",
         f"%{keyword}%",
         f"%{keyword}%",
@@ -46,26 +50,30 @@ def search_place(keyword):
     conn = get_connection()
     cursor = conn.cursor()
 
+    keyword = keyword.strip().lower()
+
+    # 1. Exact name
     cursor.execute("""
         SELECT *
         FROM places
-        WHERE
-            LOWER(name) LIKE LOWER(?)
-            OR LOWER(description) LIKE LOWER(?)
-            OR LOWER(building) LIKE LOWER(?)
-            OR LOWER(floor) LIKE LOWER(?)
-    """, (
-        f"%{keyword}%",
-        f"%{keyword}%",
-        f"%{keyword}%",
-        f"%{keyword}%"
-    ))
+        WHERE LOWER(name)=?
+    """, (keyword,))
 
     results = cursor.fetchall()
+
+    # 2. Partial name
+    if not results:
+        cursor.execute("""
+            SELECT *
+            FROM places
+            WHERE LOWER(name) LIKE ?
+        """, (f"%{keyword}%",))
+
+        results = cursor.fetchall()
+
     conn.close()
 
     return results
-
 
 # ==========================
 # Robot
