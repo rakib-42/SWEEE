@@ -56,6 +56,37 @@ FOLLOWUP_INTENTS = {
     "there",
 }
 
+DATABASE_INTENTS = {
+    "room",
+    "office",
+    "where",
+    "location",
+    "located",
+    "email",
+    "mail",
+    "contact",
+    "phone",
+    "mobile",
+    "department",
+    "faculty",
+    "designation",
+    "position",
+    "role",
+    "title",
+    "office",
+    "hours",
+    "schedule",
+    "available",
+    "building",
+    "floor",
+    "teacher",
+    "sir",
+    "madam",
+    "professor",
+    "lecturer",
+    "faculty"
+}
+
 
 CLARIFICATION_RESPONSES = [
     "Could you tell me who you're referring to?",
@@ -67,6 +98,31 @@ CLARIFICATION_RESPONSES = [
     "I'm not sure who you're asking about.",
 ]
 
+def should_search_database(question):
+    question = question.lower()
+
+    # Don't search DB for AI writing requests
+    blocked = [
+        "write",
+        "paragraph",
+        "essay",
+        "story",
+        "poem",
+        "code",
+        "program",
+        "generate",
+        "explain",
+        "describe",
+        "summarize",
+        "summary",
+        "what is",
+        "how to"
+    ]
+
+    if any(word in question for word in blocked):
+        return False
+
+    return any(word in question for word in DATABASE_INTENTS)
 
 def clarification():
     return random.choice(CLARIFICATION_RESPONSES)
@@ -184,6 +240,15 @@ def place_answer(place, question):
     return " ".join(answer)
 def search(question, entity_memory=None):
     question = " ".join(question.strip().split())
+
+    if not should_search_database(question):
+        return {
+            "found": False,
+            "answer": None,
+            "source": None,
+            "teachers": [],
+            "places": []
+        }
 
     keywords = extract_keywords(question)
 

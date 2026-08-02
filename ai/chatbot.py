@@ -10,6 +10,8 @@ from memory.entity import EntityMemory
 from database.engine import search
 from database.smalltalk import smalltalk
 
+from esp32 import display
+
 from speech.sound import (
     play_happy,
     play_sad,
@@ -23,16 +25,21 @@ entity_memory = EntityMemory()
 
 def ask(question):
 
+    display.thinking()
+
     # ---------- Small Talk ----------
     reply = smalltalk(question)
 
     if reply:
         play_happy()
+        display.speaking()
 
         memory.add_user(question)
         memory.add_assistant(reply)
 
         entity_memory.clear()
+
+        display.ready()
 
         return reply
 
@@ -41,11 +48,14 @@ def ask(question):
 
     if knowledge["found"]:
         play_happy()
+        display.speaking()
 
         memory.add_user(question)
         memory.add_assistant(knowledge["answer"])
 
         entity_memory.clear()
+
+        display.ready()
 
         return knowledge["answer"]
 
@@ -54,11 +64,14 @@ def ask(question):
 
     if reply:
         play_happy()
+        display.speaking()
 
         memory.add_user(question)
         memory.add_assistant(reply)
 
         entity_memory.clear()
+
+        display.ready()
 
         return reply
 
@@ -86,12 +99,17 @@ def ask(question):
 
         entity_memory.clear()
 
+        display.ready()
+
         return "Sorry, I couldn't find an answer."
 
-    play_sad()
+    play_happy()
+    display.speaking()
 
     memory.add_assistant(answer_text)
 
     entity_memory.clear()
+
+    display.ready()
 
     return answer_text
