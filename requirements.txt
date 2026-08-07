@@ -11,3 +11,15 @@ pydantic_core==2.46.4
 python-dotenv==1.2.2
 typing-inspection==0.4.2
 typing_extensions==4.16.0
+
+# --- Speech pipeline (speech/listener.py) ---
+numpy
+torch
+faster-whisper
+silero-vad
+rapidfuzz
+playsound
+requests
+
+# --- Text-to-speech (speech/voice.py) ---
+piper-tts

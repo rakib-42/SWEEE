@@ -1,6 +1,8 @@
 from ai.chatbot import ask
+from speech.listener import listen
 from speech.sound import play_startup
 from speech.idle_sound import start_idle_sound
+from speech.voice import speak
 
 play_startup()
 
@@ -11,7 +13,7 @@ print("      SWEEE - AI Department Assistant")
 print("=" * 50)
 
 while True:
-    user = input("\nYou: ")
+    user = listen()
 
     if user.lower() in ["exit", "quit"]:
         print("\nGoodbye!")
@@ -20,3 +22,4 @@ while True:
     reply = ask(user)
 
     print(f"\nSWEEE: {reply}")
+    speak(reply)

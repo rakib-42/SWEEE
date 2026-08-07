@@ -1,6 +1,6 @@
 import requests
 
-ESP32_IP = "192.168.137.217"
+ESP32_IP = "192.168.137.3"
 
 
 def send(state):

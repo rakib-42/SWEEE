@@ -37,8 +37,7 @@ def play_yes():
     _play("yes.mp3")
 
 
-def play_happy():
-    _play("happy.mp3")
+
 
 
 def play_sad():

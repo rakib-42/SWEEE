@@ -14,7 +14,7 @@ def idle_loop():
     running = True
 
     while running:
-        wait = random.randint(16, 47)  # 2-5 minutes
+        wait = random.randint(120, 300)  # 2-5 minutes
         time.sleep(wait)
 
         if running:

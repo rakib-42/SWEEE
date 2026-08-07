@@ -13,7 +13,6 @@ from database.smalltalk import smalltalk
 from esp32 import display
 
 from speech.sound import (
-    play_happy,
     play_sad,
     play_yes,
     play_annoyed,
@@ -47,7 +46,7 @@ def ask(question):
     knowledge = search(question, entity_memory)
 
     if knowledge["found"]:
-        play_happy()
+        
         display.speaking()
 
         memory.add_user(question)
@@ -103,7 +102,7 @@ def ask(question):
 
         return "Sorry, I couldn't find an answer."
 
-    play_happy()
+    
     display.speaking()
 
     memory.add_assistant(answer_text)

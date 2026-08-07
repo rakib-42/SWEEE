@@ -3,14 +3,11 @@ import wave
 import struct
 import numpy as np
 
-ESP32_IP = "192.168.137.217"
+ESP32_IP = "192.168.137.3"
 UDP_PORT = 5005
 
-SAMPLE_RATE = 8000
-PACKETS = 160
-
-CENTER = 2048
-GAIN = 40
+SAMPLE_RATE = 16000
+RECORD_SECONDS = 5
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 sock.bind(("0.0.0.0", UDP_PORT))
@@ -19,44 +16,42 @@ sock.sendto(b"HELLO", (ESP32_IP, UDP_PORT))
 
 print("Recording...")
 
-pcm_samples = []
+pcm = []
 
-for _ in range(PACKETS):
+packets = int((SAMPLE_RATE * RECORD_SECONDS) / 512)
 
-    data, addr = sock.recvfrom(512)
+for _ in range(packets):
 
-    if len(data) != 512:
+    data, addr = sock.recvfrom(1024)
+
+    if len(data) == 0:
         continue
 
-    samples = struct.unpack("<256H", data)
+    count = len(data) // 2
 
-    for s in samples:
+    samples = struct.unpack("<{}h".format(count), data)
 
-        pcm = (s - CENTER) * GAIN
+    pcm.extend(samples)
 
-        if pcm > 32767:
-            pcm = 32767
-        elif pcm < -32768:
-            pcm = -32768
+print("Normalizing...")
 
-        pcm_samples.append(pcm)
+audio = np.array(pcm, dtype=np.float32)
 
-audio = np.array(pcm_samples, dtype=np.float32)
-
-# Remove DC offset
 audio -= np.mean(audio)
 
-# Normalize volume
 peak = np.max(np.abs(audio))
+
 if peak > 0:
-    audio *= (30000 / peak)
+    audio *= 30000.0 / peak
 
 audio = np.clip(audio, -32768, 32767).astype(np.int16)
 
 with wave.open("speech.wav", "wb") as wav:
+
     wav.setnchannels(1)
     wav.setsampwidth(2)
     wav.setframerate(SAMPLE_RATE)
+
     wav.writeframes(audio.tobytes())
 
 print("Saved as speech.wav")
